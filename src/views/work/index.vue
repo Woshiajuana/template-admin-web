@@ -6,6 +6,7 @@
             @filter="reqTableDataList"
         ></filter-view>
         <span>业务页面</span>
+        <test-component></test-component>
     </div>
 </template>
 
@@ -21,8 +22,8 @@
             DialogMixin,
             FilterMixin,
         ],
-        created() {
-            console.log('dsadsadadadasdasdasdadasdasasdasdasdasa')
+        created () {
+            this.$testUtils();
         }
     }
 </script>
