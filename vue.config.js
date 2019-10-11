@@ -5,9 +5,6 @@ const resolve = dir => path.join(__dirname, dir);
 const vueConfig = {
   productionSourceMap: false,
   lintOnSave: false,
-    publicPath: './',
-    outputDir: 'dist',
-    assetsDir: 'static',
   devServer: {
     port: 8080,
     https: false,
