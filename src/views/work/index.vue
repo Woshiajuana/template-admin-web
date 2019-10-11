@@ -15,12 +15,15 @@
     import DataMixin from './data.mixin'
 
     export default {
-        name: 'AdminUser',
+        name: 'AdminUser1',
         mixins: [
             DataMixin,
             DialogMixin,
             FilterMixin,
         ],
+        created() {
+            console.log('dsadsadadadasdasdasdadasdasasdasdasdasa')
+        }
     }
 </script>
 
