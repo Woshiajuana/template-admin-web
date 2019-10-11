@@ -1,26 +1,48 @@
+'use strict';
+
 const path = require('path');
 
-const resolve = dir => path.join(__dirname, dir);
+function resolve(dir) {
+    return path.join(__dirname, dir);
+}
 
-const vueConfig = {
-  productionSourceMap: false,
-  lintOnSave: false,
-  devServer: {
-    port: 8080,
-    https: false,
-    before: (app) => {
-      // eslint-disable-next-line global-require
-      require('./mock').mock(app);
+// 具体配置参数 https://cli.vuejs.org/config/
+module.exports = {
+    publicPath: './',
+    // outputDir: 'dist',
+    // assetsDir: 'static',
+    lintOnSave: false,
+    productionSourceMap: false,
+    configureWebpack: {
+        name: 'Wow-Admin',
+        resolve: {
+            alias: {
+                '@': resolve('src'),
+                '@components': resolve('src/components'),
+                '@router': resolve('src/router'),
+                '@store': resolve('src/store'),
+                '@layout': resolve('src/layout'),
+                '@assets': resolve('src/assets'),
+                '@views': resolve('src/views'),
+                '@utils': resolve('src/utils'),
+            }
+        }
     },
-  },
-  baseUrl: '',
-  // crossorigin: 'anonymous',
-  // integrity: true,
-  chainWebpack: (config) => {
-    config.resolve.alias
-      .set('@', resolve('src'));
-  },
+    chainWebpack (config) {
+        config.module
+            .rule('svg')
+            .exclude.add(resolve('src/assets/icons'))
+            .end();
+        config.module
+            .rule('icons')
+            .test(/\.svg$/)
+            .include.add(resolve('src/assets/icons'))
+            .end()
+            .use('svg-sprite-loader')
+            .loader('svg-sprite-loader')
+            .options({
+                symbolId: 'icon-[name]'
+            })
+            .end();
+    },
 };
-
-
-module.exports = vueConfig;

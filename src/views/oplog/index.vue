@@ -1,0 +1,132 @@
+<template>
+    <div class="wrap">
+        <filter-view
+            :filter-form="objFilterForm"
+            :filter-button="arrFilterButton"
+            @filter="reqTableDataList"
+        ></filter-view>
+        <table-view
+            @refresh="reqTableDataList"
+            :table-query="objQuery"
+            :table-data="arrTable">
+            <el-table-column
+                prop="user.nickname"
+                label="操作员">
+            </el-table-column>
+            <el-table-column
+                prop="user.phone"
+                label="手机号">
+            </el-table-column>
+            <el-table-column
+                prop="api.name"
+                label="接口">
+            </el-table-column>
+            <el-table-column
+                prop="api.path"
+                label="接口路径">
+            </el-table-column>
+            <el-table-column
+                prop="api.method"
+                label="请求方式">
+            </el-table-column>
+            <el-table-column
+                prop="api.method"
+                label="结果">
+                <template slot-scope="scope">
+                    <el-tooltip class="item" effect="dark" :content="JSON.stringify(scope.row.result)" placement="top">
+                        <el-tag
+                            :type="scope.row.result.code === 'S00000' ? 'success' : 'danger'">
+                            {{scope.row.result.code === 'S00000' ? '成功' : '失败'}}
+                        </el-tag>
+                    </el-tooltip>
+                </template>
+            </el-table-column>
+            <el-table-column
+                prop="created_at"
+                label="创建日期">
+                <template slot-scope="scope">
+                    <span>{{scope.row.created_at | filterDate}}</span>
+                </template>
+            </el-table-column>
+            <el-table-column
+                label="操作"
+                width="150" >
+                <el-button-group slot-scope="scope">
+                    <el-button
+                        type="danger"
+                        size="mini"
+                        @click="handleDelete(scope.row)"
+                    >删除</el-button>
+                </el-button-group>
+            </el-table-column>
+        </table-view>
+    </div>
+</template>
+
+<script>
+    import DialogMixin from '@/mixins/dialog'
+    import FilterMixin from '@/mixins/filter'
+    import DataMixin from './data.mixin'
+
+    export default {
+        name: 'AdminUser',
+        mixins: [
+            DataMixin,
+            DialogMixin,
+            FilterMixin,
+        ],
+        created () {
+            this.reqTableDataList();
+            this.reqApiRouteList();
+            this.reqUserInfoList();
+        },
+        methods: {
+            reqApiRouteList () {
+                this.$curl(this.$appConst.REQ_API_ROUTE_LIST).then((res) => {
+                    this.objFilterForm.api.options = res || [];
+                }).toast();
+            },
+            reqUserInfoList () {
+                this.$curl(this.$appConst.REQ_USER_LIST).then((res) => {
+                    this.objFilterForm.user.options = res || [];
+                }).toast();
+            },
+            reqTableDataList (callback) {
+                let options = this.$verify.input(this.objFilterForm);
+                this.$curl(this.$appConst.REQ_OPLOG_LIST, {
+                    ...this.objQuery,
+                    ...options,
+                }).then((res) => {
+                    let { arrData = [], numTotal } = res || {};
+                    this.arrTable = arrData;
+                    this.objQuery.numTotal = numTotal;
+                }).toast().finally(() => typeof callback === 'function' && callback());
+            },
+            handleDelete (item) {
+                let { _id, name } = item;
+                this.$confirm(`确定删除 ${name} ?`, '温馨提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    this.doDeleteDataItem(_id);
+                }).null();
+            },
+            doDeleteDataItem(id) {
+                this.$curl(this.$appConst.DO_DELETE_OPLOG, {
+                    id,
+                }).then(() => {
+                    this.reqTableDataList();
+                }).toast();
+            },
+        },
+    }
+</script>
+
+<style lang="scss" scoped>
+    @import "~@assets/scss/define.scss";
+    .inner{
+        @extend %bsb;
+        padding: 10px;
+    }
+</style>
